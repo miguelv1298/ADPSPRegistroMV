@@ -120,44 +120,155 @@ public class Main {
     public static void iniciarSesion(){
         Scanner sc = new Scanner(System.in);
 
-        String usuario = sc.nextLine();
         System.out.println("Introduce usuario");
+        String username = sc.nextLine();
 
-        String password = sc.nextLine();
         System.out.println("introduce contraseña");
-        if(UserDAO)
+        String password = sc.nextLine();
+
+        try {
+            byte[] passwordHash = generarHashMD5(password);
+            User usuario = new User(username, passwordHash);
+            if(UserDAO.checkRegister(new User(username,passwordHash))) {
+                System.out.println("Sesion iniciada con exito");
+                menuCriptografia();
+            }
+            else{
+                System.out.println("Usuario o contraseña incorrectos");
+                }
+            }
+            catch (NoSuchAlgorithmException e){
+            System.err.println("Error al generar hash");
+            }
+        }
+
+
+
+    /**
+     *
+     */
+    public static void mostrarPersonas() {
+        List<User> users = UserDAO.listAllUsers();
+        for (User user : users) {
+            if (user.getUsername() != null) {
+                System.out.println("Username: " + user.getUsername());
+            }
+
+            if (user.getName() != null) {
+                System.out.println("Name: " + user.getName());
+            }
+
+            if (user.getAge() != null) {
+                System.out.println("Age: " + user.getAge());
+            }
+
+            if (user.getEmails() != null && !user.getEmails().isEmpty()) {
+                System.out.println("Emails:");
+                for (String email : user.getEmails()) {
+                    System.out.println(" - " + email);
+                }
+            }
+
+            if (user.getAddress() != null) {
+                System.out.println("Address: " + user.getAddress());
+            }
+
+            System.out.println("----------------------");
+        }
+    }
+
+
+    /**
+     *
+     */
+    public static void mostrarPersonasEntreEdades() {
+        Scanner sc = new Scanner(System.in);
+        System.out.println("Introduzca edad minima");
+        int minima = sc.nextInt();
+        System.out.println("Introduzca edad maxima");
+        int maxima = sc.nextInt();
+
+        List<String> users = UserDAO.usersBetweenAges(minima,maxima);
+        for (String username : users) {
+            System.out.println(username);
+        }
+    }
+    /**
+     *
+     */
+    public static void mostrarPersonasConMail(){
+        List<String> users = UserDAO.showUsersWithEmail();
+        for (String username : users) {
+            System.out.println(username);
+        }
     }
 
     /**
      *
      */
-    public static void mostrarPersonas(){}
+    public static void mostrarPersonasPorCodigoPostal(){
+        System.out.println("Introduce codigo postal:");
+        Scanner sc = new Scanner(System.in);
+        String zipCode = sc.nextLine();
+        List<String> users = UserDAO.showUserByZipCode(zipCode);
+        for (String username : users) {
+        System.out.println(username);
+        }
+    }
 
-    /**
-     *
-     */
-    public static void mostrarPersonasEntreEdades(){}
 
-    /**
-     *
-     */
-    public static void mostrarPersonasConMail(){}
 
-    /**
-     *
-     */
-    public static void mostrarPersonasPorCodigoPostal(){}
 
-    /**
-     *
-     */
-    public static void eliminarPersonas(){}
 
 
     /**
      *
      */
-    public static void actualizarContrasena(){}
+    public static void eliminarPersonas(){
+        List<String> usernames = UserDAO.listAllUsernames();
+        for(String username : usernames){
+            System.out.println(username);
+        }
+        System.out.println("----------------------");
+        System.out.println("Introduzca el nombre de la persona que quieres eliminar");
+        Scanner sc = new Scanner(System.in);
+        String username = sc.nextLine();
+        if(UserDAO.deleteUser(username)) {
+            System.out.println("Eliminado correctamente");
+        }
+        else{
+            System.out.println("No se ha eliminado ningun usuario");
+        }
+    }
+
+
+    /**
+     *
+     */
+    public static void actualizarContrasena(){
+        List<String> usernames = UserDAO.listAllUsernames();
+        for(String username : usernames){
+            System.out.println(username);
+        }
+        System.out.println("----------------------");
+        System.out.println("Introduzca el nombre de la persona a la que quieres cambiar la contraseña");
+        Scanner sc = new Scanner(System.in);
+        String username = sc.nextLine();
+        System.out.println("Introduzca la nueva contraseña");
+        String password = sc.nextLine();
+        try {
+            byte[] passwordHash = generarHashMD5(password);
+            if(UserDAO.updatePassword(username,passwordHash)) {
+                System.out.println("Contraseña actualizada correctamente");
+            }
+            else{
+                System.out.println("No se ha actualizado ninguna contraseña");
+            }
+        }
+        catch (NoSuchAlgorithmException e){
+            System.out.println("Error al generar contraseña");
+        }
+    }
 
     /**
      *
@@ -237,7 +348,7 @@ public class Main {
             }
         }
     }
-    public void menuCriptografia () {
+    public static void menuCriptografia () {
 
         boolean salir = true;
         while (salir) {
